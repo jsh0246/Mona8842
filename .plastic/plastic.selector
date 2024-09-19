@@ -1,0 +1,4 @@
+repository "Mona8842@kyuji@cloud"
+  path "/"
+    br "/main"
+    co "/main"

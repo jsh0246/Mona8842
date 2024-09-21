@@ -40,4 +40,33 @@ public class GlowHighlight : MonoBehaviour
             glowMaterialDictionary.Add(renderer, newMaterials);
         }
     }
+
+    public void ToggleGlow()
+    {
+        if (!isGLowing)
+        {
+            foreach (Renderer renderer in originalMaterialDictionary.Keys)
+            {
+                renderer.materials = glowMaterialDictionary[renderer];
+            }
+        }
+        else
+        {
+            foreach (Renderer renderer in originalMaterialDictionary.Keys)
+            {
+                renderer.materials = originalMaterialDictionary[renderer];
+            }
+        }
+
+        isGLowing = !isGLowing;
+    }
+
+    public void ToggleGlow(bool state)
+    {
+        if (isGLowing == state)
+            return;
+
+        isGLowing = !state;
+        ToggleGlow();
+    }
 }

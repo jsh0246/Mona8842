@@ -11,6 +11,8 @@ public class SelectionManager : MonoBehaviour
     public LayerMask selectionMask;
     public HexGrid hexGrid;
 
+    private List<Vector3Int> neighbors = new List<Vector3Int>();
+
     private void Awake()
     {
         if(mainCamera == null)
@@ -26,12 +28,24 @@ public class SelectionManager : MonoBehaviour
         {
             Hex selectedHex = result.GetComponent<Hex>();
 
-            List<Vector3Int> neighbors = hexGrid.GetNeighboursFor(selectedHex.HexCoords);
-            print($"Neighbours for {selectedHex.HexCoords} are : ");
-            foreach (Vector3Int neighbourPos in neighbors)
+            selectedHex.DisableHighlight();
+            foreach (Vector3Int neighbor in neighbors)
             {
-                print(neighbourPos);
+                hexGrid.GetTileAt(neighbor).DisableHighlight();
             }
+
+            neighbors = hexGrid.GetNeighboursFor(selectedHex.HexCoords);
+
+            foreach (Vector3Int neighbor in neighbors)
+            {
+                hexGrid.GetTileAt(neighbor).EnableHighlight();
+            }
+
+            //print($"Neighbours for {selectedHex.HexCoords} are : ");
+            //foreach (Vector3Int neighbourPos in neighbors)
+            //{
+            //    print(neighbourPos);
+            //}
         }
     }
 

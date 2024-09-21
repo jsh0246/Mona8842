@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6877201783177327386}
   - component: {fileID: 1043608237125312863}
   - component: {fileID: 1197776032535586290}
+  - component: {fileID: 5134966513645102027}
   m_Layer: 6
   m_Name: Hex
   m_TagString: Untagged
@@ -34,7 +35,7 @@ Transform:
   - {fileID: 4318938978487723975}
   - {fileID: 1885999460854416675}
   m_Father: {fileID: 0}
-  m_RootOrder: -1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!64 &6877201783177327386
 MeshCollider:
@@ -83,6 +84,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3b405b0ab3007648980f9eee77b2619, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &5134966513645102027
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5966440977772469288}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 842b247581da14448ba572931df145d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowMaterial: {fileID: 2100000, guid: e67fae21716863a409ed585cba8a624b, type: 2}
 --- !u!1 &7529018773804303330
 GameObject:
   m_ObjectHideFlags: 0

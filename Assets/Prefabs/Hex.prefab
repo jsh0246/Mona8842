@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 5134966513645102027}
   m_Layer: 6
   m_Name: Hex
-  m_TagString: Untagged
+  m_TagString: Hextile
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -84,6 +84,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3b405b0ab3007648980f9eee77b2619, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  highlight: {fileID: 0}
 --- !u!114 &5134966513645102027
 MonoBehaviour:
   m_ObjectHideFlags: 0

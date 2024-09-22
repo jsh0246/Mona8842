@@ -1,51 +1,33 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
-using UnityEngine.Tilemaps;
+using static UnityEngine.RuleTile.TilingRuleOutput;
 
+[SelectionBase]
 public class Unit : MonoBehaviour
 {
-    private Tilemap tileMap;
+    public int troops = 100;
 
+    private HexGrid hexGrid;
+    private Vector3Int curPos;
     private Vector3 goalPos;
-    private float speed = 2f;
-    private bool movable;
-
-    private readonly int[] dx = { 0, 0, 1, -1 };
-    private readonly int[] dz = { 1, -1, 0, 0 };
+    private float speed = 10f;
+    private bool movable = false;
 
     private void Awake()
     {
-        tileMap = GameManager.Instance.tileMap;
-        goalPos = transform.position;
-        movable = false;
+        hexGrid = GameObject.FindAnyObjectByType<HexGrid>();
     }
 
     private void Start()
     {
-        //StartCoroutine(WanderGrid());
         StartCoroutine(WanderHex());
     }
 
+
     private void FixedUpdate()
     {
-        MoveGrid();
-        //PrintCode();
-    }
-
-    private void PrintCode()
-    {
-        //print(transform.position);
-        print(tileMap.WorldToCell(transform.position));
-    }
-
-    private void MoveGrid()
-    {
-        if (movable)
-        {
-            transform.position = Vector3.MoveTowards(transform.position, goalPos, Time.fixedDeltaTime * speed);
-        }
+        MoveHex();
     }
 
     private void MoveHex()
@@ -56,42 +38,43 @@ public class Unit : MonoBehaviour
         }
     }
 
-    private IEnumerator WanderGrid()
+    private IEnumerator WanderHex()
     {
+        yield return new WaitForSecondsRealtime(1f);
+
         while (true)
         {
-            int r = Random.Range(0, 4);
-            goalPos.x = transform.position.x + dx[r];
-            goalPos.z = transform.position.z + dz[r];
+            List<Vector3Int> neighbours = hexGrid.GetNeighboursFor(curPos);
+            int rDir = Random.Range(0, neighbours.Count);
+
+            Vector3 goal = hexGrid.GetTileAt(neighbours[rDir]).transform.position;
+
+            goalPos.x = goal.x;
+            goalPos.y = transform.position.y;
+            goalPos.z = goal.z;
+
             movable = true;
-            yield return new WaitForSecondsRealtime(0.6f);
+            yield return new WaitForSecondsRealtime(0.3f);
             movable = false;
         }
     }
 
-    private IEnumerator WanderHex()
+    private void OnTriggerEnter(Collider other)
     {
-        while (true)
+        if(other.CompareTag("Hextile"))
         {
-            int r = Random.Range(0, 6);
+            curPos = other.GetComponent<HexCoordinates>().GetHexCoords();
+        }
 
-            Vector3Int delta;
-            Vector3Int curPos = tileMap.WorldToCell(transform.position);
-
-            if(curPos.y % 2 == 0)
+        if(other.CompareTag("UnitBlue"))
+        {
+            Unit otherUnit = other.GetComponent<Unit>();
+            if(troops >= otherUnit.troops)
             {
-                delta = HexDirection.directionsOffsetOdd[r];
-            } else
-            {
-                delta = HexDirection.directionsOffsetEven[r];
+                troops += otherUnit.troops;
+                // 합체 애니메이션 까지 하고 파괴
+                Destroy(other.gameObject);
             }
-
-            goalPos.x = tileMap.CellToWorld(curPos + delta).x;
-            goalPos.z = tileMap.CellToWorld(curPos + delta).z;
-
-            movable = true;
-            yield return new WaitForSecondsRealtime(1.5f);
-            movable = false;
         }
     }
 }

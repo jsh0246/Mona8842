@@ -64,7 +64,7 @@ public class _Unit : MonoBehaviour
             goalPos.x = transform.position.x + dx[r];
             goalPos.z = transform.position.z + dz[r];
             movable = true;
-            yield return new WaitForSecondsRealtime(0.6f);
+            yield return new WaitForSeconds(0.6f);
             movable = false;
         }
     }
@@ -90,7 +90,7 @@ public class _Unit : MonoBehaviour
             goalPos.z = tileMap.CellToWorld(curPos + delta).z;
 
             movable = true;
-            yield return new WaitForSecondsRealtime(1.5f);
+            yield return new WaitForSeconds(1.5f);
             movable = false;
         }
     }

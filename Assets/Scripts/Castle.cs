@@ -26,12 +26,12 @@ public class Castle : MonoBehaviour
 
     private IEnumerator GenUnit()
     {
-        yield return new WaitForSecondsRealtime(1f);
+        yield return new WaitForSeconds(1f);
 
         while (true)
         {
             Instantiate(unit, genPoint, Quaternion.identity);
-            yield return new WaitForSecondsRealtime(5f);
+            yield return new WaitForSeconds(2.5f);
         }
     }
 }

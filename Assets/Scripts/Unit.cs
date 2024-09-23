@@ -1,18 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
-using static UnityEngine.RuleTile.TilingRuleOutput;
 
 [SelectionBase]
 public class Unit : MonoBehaviour
 {
+    public TextMeshPro troopsUI;
     public int troops = 100;
 
     private HexGrid hexGrid;
     private Vector3Int curPos;
     private Vector3 goalPos;
     private float speed = 10f;
-    private bool movable = false;
+
+    public bool movable = false;
+    public bool isBattle = false;
+    public Coroutine battleCoroutine;
 
     private void Awake()
     {
@@ -24,6 +28,11 @@ public class Unit : MonoBehaviour
         StartCoroutine(WanderHex());
     }
 
+    private void Update()
+    {
+        troopsUI.text = troops.ToString();
+    }
+
 
     private void FixedUpdate()
     {
@@ -32,7 +41,7 @@ public class Unit : MonoBehaviour
 
     private void MoveHex()
     {
-        if (movable)
+        if (!isBattle && movable)
         {
             transform.position = Vector3.MoveTowards(transform.position, goalPos, Time.fixedDeltaTime * speed);
         }
@@ -40,7 +49,7 @@ public class Unit : MonoBehaviour
 
     private IEnumerator WanderHex()
     {
-        yield return new WaitForSecondsRealtime(1f);
+        yield return new WaitForSeconds(1f);
 
         while (true)
         {
@@ -54,7 +63,7 @@ public class Unit : MonoBehaviour
             goalPos.z = goal.z;
 
             movable = true;
-            yield return new WaitForSecondsRealtime(0.3f);
+            yield return new WaitForSeconds(0.3f);
             movable = false;
         }
     }
@@ -66,15 +75,69 @@ public class Unit : MonoBehaviour
             curPos = other.GetComponent<HexCoordinates>().GetHexCoords();
         }
 
-        if(other.CompareTag("UnitBlue"))
+        // tag == UnitRed일때는??
+        if(other.CompareTag(tag))
         {
             Unit otherUnit = other.GetComponent<Unit>();
             if(troops >= otherUnit.troops)
             {
+                // troops 와 otherUnit.troops의 값이 같은 경우 누가 죽는건가? 결과는 제대로 되는거 같은데 동시에 다 죽어야 할거같기도 하고, 정확한 매커니즘을 모르겠음
                 troops += otherUnit.troops;
                 // 합체 애니메이션 까지 하고 파괴
                 Destroy(other.gameObject);
             }
+        }
+
+        // 적과의 전투
+        if(tag.CompareTo("UnitBlue") == 0 && other.CompareTag("UnitRed") || tag.CompareTo("UnitRed") == 0 && other.CompareTag("UnitBlue"))
+        {
+            // 애니메이션과 코루틴?
+            Unit otherUnit = other.GetComponent<Unit>();
+            otherUnit.isBattle = isBattle = true;
+            battleCoroutine = StartCoroutine(Battle(otherUnit));
+        }
+    }
+
+    private IEnumerator Battle(Unit otherUnit)
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(2f);
+
+            if (troops >= otherUnit.troops)
+            {
+                troops -= Mathf.RoundToInt(Mathf.Abs(troops - otherUnit.troops) * 0.05f);
+                print(troops);
+            }
+            else
+            {
+                troops -= Mathf.RoundToInt(Mathf.Abs(troops - otherUnit.troops) * 0.1f);
+                print("\t" + troops);
+            }
+
+            // Destroy와 명령어들의 선후를 잘 생각해야 한다 null 에러남
+            if(Dead())
+            {
+                // 난 죽었는데 이긴 놈한테 전투(코루틴) 끝내라고 해
+                otherUnit.isBattle = isBattle = false;
+                otherUnit.StopCoroutine(otherUnit.battleCoroutine);
+                StopCoroutine(battleCoroutine);
+                break;
+            }
+        }
+
+        //movable = true;
+    }
+
+    private bool Dead()
+    {
+        if(troops <= 0)
+        {
+            Destroy(gameObject);
+            return true;
+        } else
+        {
+            return false;
         }
     }
 }

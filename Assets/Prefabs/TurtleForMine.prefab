@@ -541,7 +541,7 @@ Transform:
   - {fileID: 4180181043874448}
   - {fileID: 7620471869075458475}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &95706204029656638
 Animator:
@@ -551,7 +551,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1524411113276028}
-  m_Enabled: 0
+  m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 599b2dc9e6c44a8ebc02ddea1f18d215, type: 3}
   m_Controller: {fileID: 9100000, guid: 1f68948a5bb74f2fa9e9087a872750e9, type: 2}
   m_CullingMode: 1
@@ -626,6 +626,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   troopsUI: {fileID: 3816755330438022436}
   troops: 100
+  movable: 0
+  isBattle: 0
 --- !u!1 &1532652994627396
 GameObject:
   m_ObjectHideFlags: 0
@@ -1207,7 +1209,7 @@ GameObject:
   - component: {fileID: 5606012818408329712}
   - component: {fileID: 3816755330438022436}
   m_Layer: 0
-  m_Name: Text (TMP)
+  m_Name: Troops
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

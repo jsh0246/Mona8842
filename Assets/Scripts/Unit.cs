@@ -10,17 +10,21 @@ public class Unit : MonoBehaviour
     public int troops = 100;
 
     private HexGrid hexGrid;
+    private Animator anim;
     private Vector3Int curPos;
     private Vector3 goalPos;
     private float speed = 10f;
 
+    [HideInInspector]
     public bool movable = false;
+    [HideInInspector]
     public bool isBattle = false;
     public Coroutine battleCoroutine;
 
     private void Awake()
     {
         hexGrid = GameObject.FindAnyObjectByType<HexGrid>();
+        anim = GetComponent<Animator>();
     }
 
     private void Start()
@@ -43,6 +47,7 @@ public class Unit : MonoBehaviour
     {
         if (!isBattle && movable)
         {
+            anim.SetBool("Walk", true);
             transform.position = Vector3.MoveTowards(transform.position, goalPos, Time.fixedDeltaTime * speed);
         }
     }
@@ -63,7 +68,12 @@ public class Unit : MonoBehaviour
             goalPos.z = goal.z;
 
             movable = true;
-            yield return new WaitForSeconds(0.3f);
+            if (!isBattle)
+            {
+                anim.SetBool("Walk", false);
+                print("walk false");
+            }
+            yield return new WaitForSeconds(2f);
             movable = false;
         }
     }
@@ -88,6 +98,7 @@ public class Unit : MonoBehaviour
             }
         }
 
+        // Battle을 이웃검색으로 시작하자, 충돌은 아닌듯
         // 적과의 전투
         if(tag.CompareTo("UnitBlue") == 0 && other.CompareTag("UnitRed") || tag.CompareTo("UnitRed") == 0 && other.CompareTag("UnitBlue"))
         {
@@ -106,19 +117,20 @@ public class Unit : MonoBehaviour
 
             if (troops >= otherUnit.troops)
             {
-                troops -= Mathf.RoundToInt(Mathf.Abs(troops - otherUnit.troops) * 0.05f);
+                troops -= Mathf.RoundToInt(Mathf.Abs(troops - otherUnit.troops) * 0.1f);
                 print(troops);
             }
             else
             {
-                troops -= Mathf.RoundToInt(Mathf.Abs(troops - otherUnit.troops) * 0.1f);
+                troops -= Mathf.RoundToInt(Mathf.Abs(troops - otherUnit.troops) * 0.2f);
                 print("\t" + troops);
             }
 
             // Destroy와 명령어들의 선후를 잘 생각해야 한다 null 에러남
-            if(Dead())
+            if(troops <= 0)
             {
                 // 난 죽었는데 이긴 놈한테 전투(코루틴) 끝내라고 해
+                Dead();
                 otherUnit.isBattle = isBattle = false;
                 otherUnit.StopCoroutine(otherUnit.battleCoroutine);
                 StopCoroutine(battleCoroutine);
@@ -129,15 +141,8 @@ public class Unit : MonoBehaviour
         //movable = true;
     }
 
-    private bool Dead()
+    private void Dead()
     {
-        if(troops <= 0)
-        {
-            Destroy(gameObject);
-            return true;
-        } else
-        {
-            return false;
-        }
+        Destroy(gameObject);
     }
 }

@@ -392,7 +392,7 @@ GameObject:
   - component: {fileID: 7330043420487472885}
   - component: {fileID: 8879902066152707147}
   m_Layer: 0
-  m_Name: Text (TMP) (1)
+  m_Name: Troops
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -598,7 +598,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6922440134868736014}
-  m_Enabled: 0
+  m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 6520c6d7889f4c72b416f07f34edd515, type: 3}
   m_Controller: {fileID: 9100000, guid: 9bbcf96c9a254c5ba654027c656d7b39, type: 2}
   m_CullingMode: 1
@@ -673,6 +673,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   troopsUI: {fileID: 8879902066152707147}
   troops: 100
+  movable: 0
+  isBattle: 0
 --- !u!1 &8126883845540761801
 GameObject:
   m_ObjectHideFlags: 0

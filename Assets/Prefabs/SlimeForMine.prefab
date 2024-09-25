@@ -671,6 +671,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 059603c70765839439aa0bc23e04f576, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  state: 0
   troopsUI: {fileID: 8879902066152707147}
   troops: 100
   movable: 0

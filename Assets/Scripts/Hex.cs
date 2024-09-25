@@ -9,6 +9,8 @@ public class Hex : MonoBehaviour
     private GlowHighlight highlight;
     private HexCoordinates hexCoordinate;
 
+    private GameObject isOntheFloor;
+
     public Vector3Int HexCoords => hexCoordinate.GetHexCoords();
 
     private void Awake()
@@ -25,5 +27,18 @@ public class Hex : MonoBehaviour
     public void DisableHighlight()
     {
         highlight.ToggleGlow(false);
+    }
+
+    public GameObject WhatIsOntheFloor()
+    {
+        return isOntheFloor;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.CompareTag("UnitBlue") || other.CompareTag("UnitRed"))
+        {
+            isOntheFloor = other.gameObject;
+        }
     }
 }

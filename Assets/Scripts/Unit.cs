@@ -2,18 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 [SelectionBase]
 public class Unit : MonoBehaviour
 {
+    public enum UnitState { Idle, Run, Fight, Dead, Unite }
+
+    [HideInInspector]
+    public UnitState state;
     public TextMeshPro troopsUI;
     public int troops = 100;
+
 
     private HexGrid hexGrid;
     private Animator anim;
     private Vector3Int curPos;
     private Vector3 goalPos;
-    private float speed = 10f;
+    private float speed = 1f;
 
     [HideInInspector]
     public bool movable = false;
@@ -25,6 +31,7 @@ public class Unit : MonoBehaviour
     {
         hexGrid = GameObject.FindAnyObjectByType<HexGrid>();
         anim = GetComponent<Animator>();
+        state = UnitState.Idle;
     }
 
     private void Start()
@@ -47,7 +54,7 @@ public class Unit : MonoBehaviour
     {
         if (!isBattle && movable)
         {
-            anim.SetBool("Walk", true);
+            anim.SetBool("Run", true);
             transform.position = Vector3.MoveTowards(transform.position, goalPos, Time.fixedDeltaTime * speed);
         }
     }
@@ -59,22 +66,50 @@ public class Unit : MonoBehaviour
         while (true)
         {
             List<Vector3Int> neighbours = hexGrid.GetNeighboursFor(curPos);
-            int rDir = Random.Range(0, neighbours.Count);
+            Vector3 goal; 
+            List<Vector3Int> nUnit = hexGrid.IsEnemyNeighbouring2(curPos, tag);
+            //foreach (Vector3Int unit in nUnit)
+            //    print(hexGrid.GetTileAt(unit).WhatIsOntheFloor().name);
+            //print(unit);
 
-            Vector3 goal = hexGrid.GetTileAt(neighbours[rDir]).transform.position;
-
-            goalPos.x = goal.x;
-            goalPos.y = transform.position.y;
-            goalPos.z = goal.z;
-
-            movable = true;
-            if (!isBattle)
+            if (nUnit != null)
             {
-                anim.SetBool("Walk", false);
-                print("walk false");
+
+                int rDir = Random.Range(0, nUnit.Count);
+                Hex enemy = hexGrid.GetTileAt(nUnit[rDir]);
+
+                // FIght
+                //StartCoroutine(Battle(enemy.WhatIsOntheFloor().GetComponent<Unit>()));
+                //print(enemy.WhatIsOntheFloor().name);
+                anim.SetBool("Attack01", true);
+
+                transform.LookAt(enemy.transform.position);
+                GetDamage(enemy.WhatIsOntheFloor().GetComponent<Unit>().troops);
+
+                yield return new WaitForSeconds(2f);
+                anim.SetBool("Attack01", false);
             }
-            yield return new WaitForSeconds(2f);
-            movable = false;
+            else
+            {
+                int rDir = Random.Range(0, neighbours.Count);
+                goal = hexGrid.GetTileAt(neighbours[rDir]).transform.position;
+
+                goalPos.x = goal.x;
+                goalPos.y = transform.position.y;
+                goalPos.z = goal.z;
+
+                movable = true;
+
+                yield return new WaitForSeconds(2f);
+
+                movable = false;
+                if (!isBattle && !movable)
+                {
+                    anim.SetBool("Run", false);
+                }
+
+                yield return new WaitForSeconds(2f);
+            }
         }
     }
 
@@ -98,14 +133,44 @@ public class Unit : MonoBehaviour
             }
         }
 
+        /* !! 충돌로 적인지 판별하지 않고 Hex탐색을 통해 적을 판별하자 !!*/
         // Battle을 이웃검색으로 시작하자, 충돌은 아닌듯
         // 적과의 전투
-        if(tag.CompareTo("UnitBlue") == 0 && other.CompareTag("UnitRed") || tag.CompareTo("UnitRed") == 0 && other.CompareTag("UnitBlue"))
+        //if(tag.CompareTo("UnitBlue") == 0 && other.CompareTag("UnitRed") || tag.CompareTo("UnitRed") == 0 && other.CompareTag("UnitBlue"))
+        //{
+        //    // 애니메이션과 코루틴?
+        //    Unit otherUnit = other.GetComponent<Unit>();
+        //    otherUnit.isBattle = isBattle = true;
+        //    battleCoroutine = StartCoroutine(Battle(otherUnit));
+        //}
+    }
+
+    private void GetDamage(int enemyTroops)
+    {
+        int troopsDiff = Mathf.Abs(troops - enemyTroops);
+        float sqrtTroopsDiff = Mathf.Sqrt(troopsDiff * troopsDiff);
+
+        if (troops > enemyTroops)
         {
-            // 애니메이션과 코루틴?
-            Unit otherUnit = other.GetComponent<Unit>();
-            otherUnit.isBattle = isBattle = true;
-            battleCoroutine = StartCoroutine(Battle(otherUnit));
+            troops -= Mathf.RoundToInt(sqrtTroopsDiff * 0.1f);
+            print(1);
+        }
+        else if (troopsDiff == 0)
+        {
+            troops -= troops / 10;
+            print(2);
+        }
+        else
+        {
+            troops -= Mathf.RoundToInt(sqrtTroopsDiff * 0.2f);
+            print(3);
+        }
+
+        print(name + " " + troops + " " + enemyTroops);
+
+        if(troops <= 0)
+        {
+            Dead();
         }
     }
 
@@ -118,12 +183,12 @@ public class Unit : MonoBehaviour
             if (troops >= otherUnit.troops)
             {
                 troops -= Mathf.RoundToInt(Mathf.Abs(troops - otherUnit.troops) * 0.1f);
-                print(troops);
+                //print(troops);
             }
             else
             {
                 troops -= Mathf.RoundToInt(Mathf.Abs(troops - otherUnit.troops) * 0.2f);
-                print("\t" + troops);
+                //print("\t" + troops);
             }
 
             // Destroy와 명령어들의 선후를 잘 생각해야 한다 null 에러남

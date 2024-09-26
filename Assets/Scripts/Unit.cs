@@ -84,6 +84,7 @@ public class Unit : MonoBehaviour
                 anim.SetBool("Attack01", true);
 
                 transform.LookAt(enemy.transform.position);
+                yield return null;
                 GetDamage(enemy.WhatIsOntheFloor().GetComponent<Unit>().troops);
 
                 yield return new WaitForSeconds(2f);

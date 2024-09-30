@@ -9,6 +9,7 @@ public class Hex : MonoBehaviour
     private GlowHighlight highlight;
     private HexCoordinates hexCoordinate;
 
+    [SerializeField]
     private GameObject isOntheFloor;
 
     public Vector3Int HexCoords => hexCoordinate.GetHexCoords();
@@ -39,6 +40,14 @@ public class Hex : MonoBehaviour
         if(other.CompareTag("UnitBlue") || other.CompareTag("UnitRed"))
         {
             isOntheFloor = other.gameObject;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("UnitBlue") || other.CompareTag("UnitRed"))
+        {
+            isOntheFloor = null;
         }
     }
 }

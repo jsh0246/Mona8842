@@ -60,6 +60,27 @@ public class HexGrid : MonoBehaviour
         return neighbouringObj;
     }
 
+    public void WhoisMyNeighbour(Vector3Int hexCoordinates, ref List<Unit> unitBlue, ref List<Unit> unitRed)
+    {
+        foreach (Vector3Int hex in hexTileNeighboursDict[hexCoordinates])
+        {
+            GameObject o = GetTileAt(hex).WhatIsOntheFloor();
+            if (o != null)
+            {
+                Unit nUnit = o.GetComponent<Unit>();
+
+                if (nUnit.CompareTag("UnitBlue") && nUnit.troops > 0)
+                {
+                    unitBlue.Add(nUnit);
+                }
+                else if (nUnit.CompareTag("UnitRed") && nUnit.troops > 0)
+                {
+                    unitRed.Add(nUnit);
+                }
+            }
+        }
+    }
+
     // 뭐가 있는 좌표만 반환해보자 일단은
     public List<Vector3Int> IsEnemyNeighbouring2(Vector3Int hexCoordinates, string myTag)
     {

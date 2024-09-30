@@ -10357,6 +10357,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SlimeForMine
       objectReference: {fileID: 0}
+    - target: {fileID: 6922440134868736014, guid: 20a83f958690ca340a3c99a6df29e53e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

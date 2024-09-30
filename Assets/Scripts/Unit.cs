@@ -10,7 +10,6 @@ public class Unit : MonoBehaviour
 {
     public enum UnitState { Idle, Run, Stand, Battle, Dead, Unite }
 
-    [HideInInspector]
     public UnitState state;
     public TextMeshPro troopsUI;
     public int troops = 100;
@@ -21,7 +20,7 @@ public class Unit : MonoBehaviour
     private Animator anim;
     private Vector3Int curPos;
     private Vector3 goalPos;
-    private float speed = 2f;
+    private float speed = 4f;
     private Vector3 lastPos;
 
     [HideInInspector]
@@ -93,20 +92,28 @@ public class Unit : MonoBehaviour
 
 
 
+            if (troops <= 0)
+            {
+                state = UnitState.Dead;
+            }
+            else if (state == UnitState.Battle && (CompareTag("UnitBlue") && unitRed.Count == 0 || CompareTag("UnitRed") && unitBlue.Count == 0))
+            {
+                state = UnitState.Run;
+            }
             // 내 태그와 비교했을 때, 적이 있을때 => Fight
-            if (CompareTag("UnitBlue") && unitRed.Count > 0 || CompareTag("UnitRed") && unitBlue.Count > 0)
+            else if (CompareTag("UnitBlue") && unitRed.Count > 0 || CompareTag("UnitRed") && unitBlue.Count > 0)
             {
                 state = UnitState.Battle;
             }
 
             // 내 태그와 비교했을 때, 아군이 있을 때 => Unite
-            else if (CompareTag("UnitBlue") && unitBlue.Count > 0 || CompareTag("UnitRed") && unitRed.Count > 0)
-            {
-                state = UnitState.Unite;
-            }
+            //else if (CompareTag("UnitBlue") && unitBlue.Count > 0 || CompareTag("UnitRed") && unitRed.Count > 0)
+            //{
+            //    state = UnitState.Unite;
+            //}
 
-            print(unitBlue.Count + " " + unitRed.Count);
-            print(state);
+            //print(name + " is : " + unitBlue.Count + " " + unitRed.Count + " " + state);
+            //print(state);
 
             switch (state)
             {
@@ -117,6 +124,7 @@ public class Unit : MonoBehaviour
 
                     break;
                 case UnitState.Run: // 기본 상태
+                    anim.SetBool("Attack01", false);
                     RunState(neighbours);
                     yield return new WaitForSeconds(2f);
                     state = UnitState.Idle;
@@ -132,16 +140,26 @@ public class Unit : MonoBehaviour
                     // unitred unitblue 정렬하던지 뭘 먼저 공격할건지 정해야됨 지금은 그냥0번인덱스로 했음
                     if (CompareTag("UnitBlue") && unitRed.Count > 0) 
                     {
-                        print("11");
+                        //print("11");
                         //StartCoroutine(BattleState(unitRed[0]));
                         GetDamage(unitRed[0].troops);
                     } else if(CompareTag("UnitRed") && unitBlue.Count > 0) {
-                        print("22");
+                        //print("22");
                         GetDamage(unitBlue[0].troops);
                         //StartCoroutine(BattleState(unitBlue[0]));
                     }
 
-                    yield return new WaitForSeconds(2f);
+                    // 이런식으로 할 게 아니라 전투가 끝나면 이라는 조건이 필요할듯
+                    // 지금은 waiftforsecodns(2f)는 지속적인 싸움 활용시 되는거고 전투함수를 제대로 만들어서 시작과 끝을 명확하게 받아내야할듯
+                    if (troops <= 0)
+                    {
+                        yield return new WaitForSeconds(0.5f);
+                    }
+                    else
+                    {
+                        yield return new WaitForSeconds(2f);
+                    }
+                    
                     anim.SetBool("Attack01", false);
 
                     break;
@@ -328,21 +346,23 @@ public class Unit : MonoBehaviour
 
         anim.SetBool("Attack01", true);
 
-        if (troops > enemyTroops)
-        {
-            troops -= Mathf.RoundToInt(sqrtTroopsDiff * 2f);
-            //print(1);
-        }
-        else if (troopsDiff == 0)
-        {
-            troops -= troops / 10;
-            //print(2);
-        }
-        else
-        {
-            troops -= Mathf.RoundToInt(sqrtTroopsDiff * 4f);
-            //print(3);
-        }
+        //if (troops > enemyTroops)
+        //{
+        //    troops -= Mathf.RoundToInt(sqrtTroopsDiff * 2f);
+        //    //print(1);
+        //}
+        //else if (troopsDiff == 0)
+        //{
+        //    troops -= troops / 10;
+        //    //print(2);
+        //}
+        //else
+        //{
+        //    troops -= Mathf.RoundToInt(sqrtTroopsDiff * 4f);
+        //    //print(3);
+        //}
+
+        troops -= 50;
 
         //print(name + " " + troops + " " + enemyTroops);
 
@@ -350,13 +370,12 @@ public class Unit : MonoBehaviour
         {
             state = UnitState.Dead;
             //Dead();
-            print("they all dead");
         }
     }
 
     private void Dead()
     {
-        print("dead function");
+        anim.SetBool("Attack01", false);
         anim.SetTrigger("Dead");
         StopAllCoroutines();
         Destroy(gameObject, 5f);

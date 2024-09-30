@@ -62,6 +62,8 @@ public class HexGrid : MonoBehaviour
 
     public void WhoisMyNeighbour(Vector3Int hexCoordinates, ref List<Unit> unitBlue, ref List<Unit> unitRed)
     {
+        unitBlue.Clear();
+        unitRed.Clear();
         foreach (Vector3Int hex in hexTileNeighboursDict[hexCoordinates])
         {
             GameObject o = GetTileAt(hex).WhatIsOntheFloor();

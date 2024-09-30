@@ -11,7 +11,10 @@ public class Castle : MonoBehaviour
 
     private void Awake()
     {
-        genPoint = transform.position + new Vector3(1f, 0f, 1.73f);
+        if (name == "CastleBlue")
+            genPoint = transform.position + new Vector3(1f, 0f, 1.73f);
+        else
+            genPoint = transform.position + new Vector3(-1f, 0f, -1.73f);
     }
 
     private void Start()

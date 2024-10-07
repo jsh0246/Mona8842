@@ -2,16 +2,17 @@ using UnityEngine;
 
 public class Billboard : MonoBehaviour
 {
-    private Transform mainCam;
+    private Camera mainCamera;
 
-    private void Start()
+    void Start()
     {
-        mainCam = Camera.main.transform;
+        mainCamera = Camera.main;
     }
 
-    private void LateUpdate()
+    void LateUpdate()
     {
-        transform.LookAt(transform.position + mainCam.rotation * Vector3.forward,
-            mainCam.rotation * Vector3.up);
+        // 오브젝트가 항상 카메라를 향하도록 함
+        transform.LookAt(transform.position + mainCamera.transform.rotation * Vector3.forward,
+                         mainCamera.transform.rotation * Vector3.up);
     }
 }

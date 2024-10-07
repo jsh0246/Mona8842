@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 6774573323269334981}
   - component: {fileID: 1252324917527574955}
   - component: {fileID: 5254324759631452951}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: CastleRed
-  m_TagString: Untagged
+  m_TagString: CastleRed
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

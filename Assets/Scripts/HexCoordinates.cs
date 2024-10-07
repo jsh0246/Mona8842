@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// Hex좌표의 가장 기본 클래스, ConverPositionToOffset에서 현재 좌표를 받아서 Hex좌표로 변경한다.
 public class HexCoordinates : MonoBehaviour
 {
     public static float xOffset = 2, yOffset = 1, zOffset = 1.73f;

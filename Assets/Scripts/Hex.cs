@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// Hex좌표의 가장 기본인 HexCoordinate를 멤버변수로 가지고 있다.
+// HexCoordinate를 capsule화해서 씀
 [SelectionBase]
 public class Hex : MonoBehaviour
 {
@@ -18,6 +20,7 @@ public class Hex : MonoBehaviour
     {
         highlight = GetComponent<GlowHighlight>();
         hexCoordinate = GetComponent<HexCoordinates>();
+        isOntheFloor = null;
     }
 
     public void EnableHighlight()
@@ -28,6 +31,11 @@ public class Hex : MonoBehaviour
     public void DisableHighlight()
     {
         highlight.ToggleGlow(false);
+    }
+
+    public void ThisIsOntheFloor(GameObject o)
+    {
+        isOntheFloor = o;
     }
 
     public GameObject WhatIsOntheFloor()

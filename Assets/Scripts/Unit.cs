@@ -2,8 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static UnityEngine.RuleTile.TilingRuleOutput;
 
 [SelectionBase]
 public class Unit : MonoBehaviour
@@ -14,25 +12,22 @@ public class Unit : MonoBehaviour
     public TextMeshPro troopsUI;
     public int troops = 100;
 
-
     private HexGrid hexGrid;
-    private Rigidbody rb;
     private Animator anim;
     private Vector3Int curPos;
     private Vector3 goalPos;
     private float speed = 4f;
-    private Vector3 lastPos;
 
     [HideInInspector]
     public bool movable = false;
     [HideInInspector]
     public bool isBattle = false;
     public Coroutine battleCoroutine;
+    private Unit counterpart;
 
     private void Awake()
     {
         hexGrid = GameObject.FindAnyObjectByType<HexGrid>();
-        rb = GetComponent<Rigidbody>();
         anim = GetComponent<Animator>();
     }
 
@@ -41,7 +36,6 @@ public class Unit : MonoBehaviour
         //StartCoroutine(WanderHex());
 
         state = UnitState.Run;
-        lastPos = transform.position;
         StartCoroutine(StateChange());
     }
 
@@ -74,23 +68,10 @@ public class Unit : MonoBehaviour
             yield return null;
 
             List<Vector3Int> neighbours = hexGrid.GetNeighboursFor(curPos);
+            //List<Vector3Int> neighbours = hexGrid.GetNeighboursForExceptObstacles(curPos);
             List<Unit> unitBlue = new();
             List<Unit> unitRed = new();
             hexGrid.WhoisMyNeighbour(curPos, ref unitBlue, ref unitRed);
-
-            //print(rb.velocity);
-            //state = UnitState.Run;
-
-            //if (rb.velocity == Vector3.zero)
-            //{
-            //    state = UnitState.Idle;
-            //}
-            //else
-            //{
-            //    state = UnitState.Run;
-            //}
-
-
 
             if (troops <= 0)
             {
@@ -119,14 +100,14 @@ public class Unit : MonoBehaviour
             {
                 case UnitState.Idle: // 움직임 간에 잠깐 여유를 줄까 말까, 주면 얼마나 줄지
                     IdleState();
-                    yield return new WaitForSeconds(0.5f);
+                    yield return new WaitForSeconds(0.1f);
                     state = UnitState.Run;
 
                     break;
                 case UnitState.Run: // 기본 상태
                     anim.SetBool("Attack01", false);
                     RunState(neighbours);
-                    yield return new WaitForSeconds(2f);
+                    yield return new WaitForSeconds(0.6f);
                     state = UnitState.Idle;
 
                     break;
@@ -140,24 +121,64 @@ public class Unit : MonoBehaviour
                     // unitred unitblue 정렬하던지 뭘 먼저 공격할건지 정해야됨 지금은 그냥0번인덱스로 했음
                     if (CompareTag("UnitBlue") && unitRed.Count > 0) 
                     {
-                        //print("11");
-                        //StartCoroutine(BattleState(unitRed[0]));
-                        GetDamage(unitRed[0].troops);
+                        //3. 내가 상대로부터 데미지를 받는 방식
+                        //troops -= 50;
+                        //if (troops <= 0)
+                        //{
+                        //    counterpart.counterpart = null;
+                        //}
+
+                        // 2. 상대에게 데미지를 주는 방식
+                        if (counterpart == null)
+                        {
+                            counterpart = unitRed[0];
+                        }
+                        transform.LookAt(counterpart.transform);
+                        anim.SetBool("Attack01", true);
+                        counterpart.troops -= 50;
+                        if (counterpart.troops <= 0)
+                        {
+                            counterpart = null;
+                        }
+
+
+
+                        // 1. 
+                        //if (unitRed[0].state != UnitState.Battle)
+                        //{
+                        //    GetDamage(unitRed[0].troops);
+                        //}
                     } else if(CompareTag("UnitRed") && unitBlue.Count > 0) {
-                        //print("22");
-                        GetDamage(unitBlue[0].troops);
-                        //StartCoroutine(BattleState(unitBlue[0]));
+
+                        if (counterpart == null)
+                        {
+                            counterpart = unitBlue[0];
+
+                        }
+                        transform.LookAt(counterpart.transform);
+                        anim.SetBool("Attack01", true);
+                        counterpart.troops -= 50;
+                        if (counterpart.troops <= 0)
+                        {
+                            counterpart = null;
+                        }
+
+                        //if (unitBlue[0].state != UnitState.Battle)
+                        //{
+                        //    GetDamage(unitBlue[0].troops);
+                        //}
                     }
 
                     // 이런식으로 할 게 아니라 전투가 끝나면 이라는 조건이 필요할듯
                     // 지금은 waiftforsecodns(2f)는 지속적인 싸움 활용시 되는거고 전투함수를 제대로 만들어서 시작과 끝을 명확하게 받아내야할듯
+                    yield return new WaitForSeconds(0.1f);
                     if (troops <= 0)
                     {
-                        yield return new WaitForSeconds(0.5f);
+                        yield return new WaitForSeconds(0.1f);
                     }
                     else
                     {
-                        yield return new WaitForSeconds(2f);
+                        yield return new WaitForSeconds(1.4f);
                     }
                     
                     anim.SetBool("Attack01", false);
@@ -186,50 +207,15 @@ public class Unit : MonoBehaviour
         int rDir = Random.Range(0, neighbours.Count);
         Vector3 goal = hexGrid.GetTileAt(neighbours[rDir]).transform.position;
 
+
         goalPos.x = goal.x;
         goalPos.y = transform.position.y;
         goalPos.z = goal.z;
 
+        transform.rotation = Quaternion.LookRotation(goal-new Vector3(transform.position.x, 0, transform.position.z));
+
         movable = true;
         anim.SetBool("Run", true);
-    }
-
-    private IEnumerator BattleState(Unit otherUnit)
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(1f);
-            anim.SetBool("Attack01", true);
-
-            print(troops + " " + otherUnit.troops);
-
-            if (troops >= otherUnit.troops)
-            {
-                troops -= Mathf.RoundToInt(Mathf.Abs(troops - otherUnit.troops) * 0.1f);
-                //print(troops);
-            }
-            else
-            {
-                troops -= Mathf.RoundToInt(Mathf.Abs(troops - otherUnit.troops) * 0.2f);
-                //print("\t" + troops);
-            }
-
-            // Destroy와 명령어들의 선후를 잘 생각해야 한다 null 에러남
-            if (troops <= 0)
-            {
-                state = UnitState.Dead;
-                // 난 죽었는데 이긴 놈한테 전투(코루틴) 끝내라고 해
-                //Dead();
-                //otherUnit.isBattle = isBattle = false;
-                //otherUnit.StopCoroutine(otherUnit.battleCoroutine);
-                //StopCoroutine(battleCoroutine);
-                break;
-            }
-        }
-
-        anim.SetBool("Attack01", false);
-        //state = UnitState.Run;
-        //movable = true;
     }
 
     private void MoveHex()
@@ -252,61 +238,6 @@ public class Unit : MonoBehaviour
         }
     }
 
-    private IEnumerator WanderHex()
-    {
-        yield return new WaitForSeconds(1f);
-
-        while (true)
-        {
-            List<Vector3Int> neighbours = hexGrid.GetNeighboursFor(curPos);
-            Vector3 goal; 
-            List<Vector3Int> nUnit = hexGrid.IsEnemyNeighbouring2(curPos, tag);
-            //foreach (Vector3Int unit in nUnit)
-            //    print(hexGrid.GetTileAt(unit).WhatIsOntheFloor().name);
-            //print(unit);
-
-            if (nUnit != null)
-            {
-
-                int rDir = Random.Range(0, nUnit.Count);
-                Hex enemy = hexGrid.GetTileAt(nUnit[rDir]);
-
-                // FIght
-                //StartCoroutine(Battle(enemy.WhatIsOntheFloor().GetComponent<Unit>()));
-                //print(enemy.WhatIsOntheFloor().name);
-                anim.SetBool("Attack01", true);
-
-                transform.LookAt(enemy.transform.position);
-                yield return null;
-                GetDamage(enemy.WhatIsOntheFloor().GetComponent<Unit>().troops);
-
-                yield return new WaitForSeconds(2f);
-                anim.SetBool("Attack01", false);
-            }
-            else
-            {
-                int rDir = Random.Range(0, neighbours.Count);
-                goal = hexGrid.GetTileAt(neighbours[rDir]).transform.position;
-
-                goalPos.x = goal.x;
-                goalPos.y = transform.position.y;
-                goalPos.z = goal.z;
-
-                movable = true;
-
-                yield return new WaitForSeconds(2f);
-
-                movable = false;
-                if (!isBattle && !movable)
-                {
-                    anim.SetBool("Run", false);
-                }
-
-                yield return new WaitForSeconds(2f);
-            }
-        }
-    }
-
     private void OnTriggerEnter(Collider other)
     {
         if(other.CompareTag("Hextile"))
@@ -326,17 +257,6 @@ public class Unit : MonoBehaviour
                 Destroy(other.gameObject);
             }
         }
-
-        /* !! 충돌로 적인지 판별하지 않고 Hex탐색을 통해 적을 판별하자 !!*/
-        // Battle을 이웃검색으로 시작하자, 충돌은 아닌듯
-        // 적과의 전투
-        //if(tag.CompareTo("UnitBlue") == 0 && other.CompareTag("UnitRed") || tag.CompareTo("UnitRed") == 0 && other.CompareTag("UnitBlue"))
-        //{
-        //    // 애니메이션과 코루틴?
-        //    Unit otherUnit = other.GetComponent<Unit>();
-        //    otherUnit.isBattle = isBattle = true;
-        //    battleCoroutine = StartCoroutine(Battle(otherUnit));
-        //}
     }
 
     private void GetDamage(int enemyTroops)
@@ -381,3 +301,10 @@ public class Unit : MonoBehaviour
         Destroy(gameObject, 5f);
     }
 }
+
+// 이동시 해당 방향 보기
+// 유닛 머리 돌리기, 싸우는 대상 명확히 보이게 하기
+// 한번에 하나씩만 싸우게 하기
+// db 연동하기
+// 멀티플레이
+// ugui => item, boss

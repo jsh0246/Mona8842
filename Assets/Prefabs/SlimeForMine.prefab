@@ -686,7 +686,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   state: 0
   troopsUI: {fileID: 8833014263564477059}
-  troops: 1000
+  troops: 100
   movable: 0
   isBattle: 0
 --- !u!1 &8126883845540761801
